@@ -41,13 +41,12 @@ LEFT JOIN esq_personas p ON ej.registro_id = p.id;
 
 -- 2. Vista de Ranking Final (Lógica de Baremo)
 CREATE VIEW esq_vista_ranking_final AS
-WITH prom_sub AS (
-    SELECT e.inscripcion_id, de.submetrica_id, AVG(de.puntaje_asignado) as avg_s 
-    FROM esq_evaluaciones e JOIN esq_detalles_evaluacion de ON e.id = de.evaluacion_id GROUP BY 1, 2
-),
-prom_met AS (
-    SELECT ps.inscripcion_id, m.peso_porcentual, AVG(ps.avg_s) as avg_m 
-    FROM prom_sub ps JOIN esq_submetricas s ON ps.submetrica_id = s.id JOIN esq_metricas m ON s.metrica_id = m.id GROUP BY 1, m.id
+WITH prom_met AS (
+    SELECT e.inscripcion_id, de.metrica_id, m.peso_porcentual, AVG(de.puntaje_asignado) as avg_m 
+    FROM esq_evaluaciones e 
+    JOIN esq_detalles_evaluacion de ON e.id = de.evaluacion_id 
+    JOIN esq_metricas m ON de.metrica_id = m.id
+    GROUP BY 1, 2, 3
 )
 SELECT ev.titulo as evento, 
        COALESCE(ins.nombre_equipo, p.nombres || ' ' || p.apellidos) as proyecto_o_participante, 
