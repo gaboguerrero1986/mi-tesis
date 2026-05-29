@@ -1,0 +1,43 @@
+<div class="jury-dashboard p-4">
+    <div class="mb-4">
+        <h1 class="text-3xl font-bold text-900 mb-2">Panel de Evaluación</h1>
+        <p class="text-600">Seleccione un evento para comenzar la evaluación.</p>
+    </div>
+
+    <div *ngIf="loading" class="flex justify-content-center">
+        <p-progressSpinner></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && events.length === 0" class="text-center p-5 surface-card border-round shadow-1">
+        <i class="pi pi-calendar-times text-5xl text-400 mb-3"></i>
+        <div class="text-xl font-medium text-900 mb-2">No hay eventos disponibles</div>
+        <p class="text-600">No hay eventos publicados para evaluar en este momento.</p>
+    </div>
+
+    <div class="grid" *ngIf="!loading && events.length > 0">
+        <div class="col-12 md:col-6 lg:col-4" *ngFor="let event of events">
+            <p-card [header]="event.titulo"
+                styleClass="h-full shadow-2 hover:shadow-4 transition-all transition-duration-200">
+                <ng-template pTemplate="header">
+                    <div class="h-10rem bg-primary-50 flex align-items-center justify-content-center border-round-top">
+                        <i class="pi pi-calendar text-6xl text-primary"></i>
+                    </div>
+                </ng-template>
+
+                <div class="mb-3">
+                    <div class="flex align-items-center gap-2 text-600 mb-2">
+                        <i class="pi pi-clock"></i>
+                        <span>{{ event.fecha_inicio | date:'mediumDate' }}</span>
+                    </div>
+                </div>
+
+                <ng-template pTemplate="footer">
+                    <button *ngIf="!event.ya_evaluado" pButton pRipple label="Evaluar Evento" icon="pi pi-check-circle"
+                        class="w-full p-button-primary text-white" [disabled]="!isEventActive(event)" (click)="evaluateEvent(event.id!)"></button>
+                    <button *ngIf="event.ya_evaluado" pButton pRipple label="Evaluado" icon="pi pi-check-circle"
+                        class="w-full p-button-danger" [disabled]="true"></button>
+                </ng-template>
+            </p-card>
+        </div>
+    </div>
+</div>

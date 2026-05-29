@@ -1,0 +1,155 @@
+<div class="layout-wrapper">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="layout-mask" *ngIf="sidebarVisible" (click)="sidebarVisible = false"></div>
+
+  <!-- Sidebar -->
+  <div class="layout-sidebar" [class.active-mobile]="sidebarVisible" [class.layout-sidebar-collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <i class="pi pi-shield text-4xl text-yellow-500 mr-2"></i>
+        <span class="app-name">Eventos UTM</span>
+      </div>
+    </div>
+
+    <ul class="layout-menu">
+      <li [class.active]="activeTab === 'dashboard'" (click)="activeTab = 'dashboard'; sidebarVisible = false">
+        <i class="pi pi-home"></i>
+        <span>Dashboard</span>
+      </li>
+      <li [class.active]="activeTab === 'events'" (click)="activeTab = 'events'; sidebarVisible = false">
+        <i class="pi pi-calendar"></i>
+        <span>Eventos</span>
+      </li>
+      <li [class.active]="activeTab === 'juries'" (click)="activeTab = 'juries'; sidebarVisible = false">
+        <i class="pi pi-users"></i>
+        <span>Jurados</span>
+      </li>
+      <li [class.active]="activeTab === 'managers'" (click)="activeTab = 'managers'; sidebarVisible = false">
+        <i class="pi pi-briefcase"></i>
+        <span>Gestores</span>
+      </li>
+      <li [class.active]="activeTab === 'metrics'" (click)="activeTab = 'metrics'; sidebarVisible = false">
+        <i class="pi pi-sliders-h"></i>
+        <span>Métricas Globales</span>
+      </li>
+      <li [class.active]="activeTab === 'reports'" (click)="activeTab = 'reports'; sidebarVisible = false">
+        <i class="pi pi-chart-bar"></i>
+        <span>Reportes</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="menu-item logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+        <span>Cerrar Sesión</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="layout-main-container" [class.layout-main-container-collapsed]="sidebarCollapsed">
+    <div class="layout-topbar">
+      <div class="topbar-left flex align-items-center">
+        <!-- Mobile Toggle Button -->
+        <button class="p-link layout-menu-button mr-3 lg:hidden" (click)="toggleSidebar()">
+          <i class="pi pi-bars text-2xl"></i>
+        </button>
+        <!-- Desktop Toggle Button -->
+        <button class="p-link layout-menu-button mr-3 hidden lg:inline-flex" (click)="toggleCollapse()">
+          <i class="pi pi-bars text-2xl"></i>
+        </button>
+        <h2 class="page-title">{{ getTitle() }}</h2>
+      </div>
+      <div class="topbar-right">
+        <span class="user-greeting hidden md:inline">Hola, Administrador</span>
+        <div class="user-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-content">
+      <!-- Dashboard Stats Only Show on Dashboard Tab -->
+      <div *ngIf="activeTab === 'dashboard'" class="fade-in">
+        <!-- We will add stats cards here later -->
+        <div class="grid">
+          <div class="col-12 md:col-4">
+            <div class="card-stat card-accent mb-3 p-card p-3">
+              <div class="flex justify-content-between mb-3">
+                <div>
+                  <span class="block text-500 font-medium mb-3">Eventos Activos</span>
+                  <div class="text-900 font-medium text-xl">{{ stats.activeEvents }}</div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-green-100 border-round"
+                  style="width:2.5rem;height:2.5rem">
+                  <i class="pi pi-calendar text-green-500 text-xl"></i>
+                </div>
+              </div>
+              <span class="text-green-500 font-medium">En curso </span>
+              <span class="text-500">actualmente</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-4">
+            <div class="card-stat card-accent mb-3 p-card p-3">
+              <div class="flex justify-content-between mb-3">
+                <div>
+                  <span class="block text-500 font-medium mb-3">Jurados</span>
+                  <div class="text-900 font-medium text-xl">{{ stats.totalJuries }}</div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-orange-100 border-round"
+                  style="width:2.5rem;height:2.5rem">
+                  <i class="pi pi-users text-orange-500 text-xl"></i>
+                </div>
+              </div>
+              <span class="text-green-500 font-medium">Registrados </span>
+              <span class="text-500">en el sistema</span>
+            </div>
+          </div>
+          <div class="col-12 md:col-4">
+            <div class="card-stat card-accent mb-3 p-card p-3">
+              <div class="flex justify-content-between mb-3">
+                <div>
+                  <span class="block text-500 font-medium mb-3">Evaluaciones</span>
+                  <div class="text-900 font-medium text-xl">{{ stats.totalEvaluations }}</div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                  style="width:2.5rem;height:2.5rem">
+                  <i class="pi pi-check-square text-blue-500 text-xl"></i>
+                </div>
+              </div>
+              <span class="text-green-500 font-medium">Total </span>
+              <span class="text-500">realizadas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links or Recent Activity -->
+        <div class="grid">
+          <div class="col-12">
+            <div class="p-card p-3">
+              <h3>Resumen de Actividad</h3>
+              <p>Bienvenido al nuevo panel de control. Seleccione una opción del menú lateral.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Render Components based on Active Tab -->
+      <div *ngIf="activeTab === 'events'" class="fade-in">
+        <app-event-management></app-event-management>
+      </div>
+      <div *ngIf="activeTab === 'metrics'" class="fade-in">
+        <app-global-metrics></app-global-metrics>
+      </div>
+      <div *ngIf="activeTab === 'juries'" class="fade-in">
+        <app-jury-management></app-jury-management>
+      </div>
+      <div *ngIf="activeTab === 'managers'" class="fade-in">
+        <app-manager-management></app-manager-management>
+      </div>
+      <div *ngIf="activeTab === 'reports'" class="fade-in">
+        <app-reports-dashboard></app-reports-dashboard>
+      </div>
+    </div>
+  </div>
+</div>

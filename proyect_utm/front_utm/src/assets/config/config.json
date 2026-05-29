@@ -1,0 +1,13 @@
+{
+  "appName": "Sistema de Evaluación de Eventos UTM",
+  "version": "1.0.0",
+  "institution": "Universidad Técnica de Manabí",
+  "supportEmail": "soporte.evaluaciones@utm.edu.ec",
+  "maxFileSize": 5242880,
+  "allowedFileTypes": [".pdf", ".jpg", ".jpeg", ".png"],
+  "evaluationSettings": {
+    "maxScore": 10,
+    "minScore": 1,
+    "autoSaveInterval": 30000
+  }
+}

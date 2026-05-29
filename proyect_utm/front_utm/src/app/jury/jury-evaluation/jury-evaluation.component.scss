@@ -1,0 +1,25 @@
+.jury-evaluation {
+    min-height: 100vh;
+    background: var(--surface-ground);
+}
+
+.participant-card {
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-published {
+    background-color: var(--green-100);
+    color: var(--green-700);
+}

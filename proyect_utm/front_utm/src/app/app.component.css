@@ -1,0 +1,59 @@
+/* Estilos generales */
+.app-container {
+  font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-weight: 300;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout principal */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: var(--background);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .content-wrapper { flex-direction: column; }
+  .main-content { padding: 15px; }
+}
+
+.header-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand .title {
+  color: var(--utm-green);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+

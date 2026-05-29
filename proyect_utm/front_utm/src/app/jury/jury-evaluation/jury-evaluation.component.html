@@ -1,0 +1,118 @@
+<div class="jury-evaluation p-4 max-w-4xl mx-auto">
+    <p-confirmDialog></p-confirmDialog>
+
+    <div *ngIf="loading" class="flex justify-content-center p-5">
+        <p-progressSpinner></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && event" class="surface-card p-4 shadow-2 border-round">
+        <div class="flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-900 mb-2">{{ event.titulo }}</h1>
+                <div class="flex align-items-center gap-3 text-600">
+                    <span><i class="pi pi-calendar mr-1"></i> {{ event.fecha_inicio | date:'mediumDate' }}</span>
+                    <span class="status-badge status-published">En Evaluación</span>
+                </div>
+            </div>
+            <button pButton icon="pi pi-arrow-left" label="Volver" class="p-button-outlined p-button-secondary"
+                routerLink="/jury"></button>
+        </div>
+
+        <p class="text-700 line-height-3 mb-5 surface-50 p-3 border-round hidden">
+            <!-- description was here -->
+        </p>
+
+        <!-- Participants Selection (if event has participants) -->
+        <div *ngIf="participants.length > 0" class="mb-5">
+            <h3 class="text-xl font-semibold text-800 mb-3 border-bottom-1 surface-border pb-2">
+                Seleccione el Participante a Evaluar
+            </h3>
+            <div class="grid">
+                <div *ngFor="let participant of participants" class="col-12 md:col-6 lg:col-4">
+                    <div class="participant-card p-3 border-2 border-round cursor-pointer transition-all transition-duration-200"
+                        [ngClass]="{
+                            'border-primary bg-primary-50': selectedParticipantId === participant.id,
+                            'border-green-500 bg-green-50': getParticipantStatus(participant.id!) === 'evaluated',
+                            'border-300 hover:border-400': getParticipantStatus(participant.id!) === 'pending'
+                        }" (click)="selectParticipant(participant.id!)">
+                        <div class="flex align-items-center justify-content-between">
+                            <div>
+                                <div class="font-semibold text-900">{{ participant.nombre_equipo || 'Individual' }}</div>
+                            </div>
+                            <div>
+                                <i *ngIf="getParticipantStatus(participant.id!) === 'evaluated'"
+                                    class="pi pi-check-circle text-green-500 text-2xl"></i>
+                                <i *ngIf="getParticipantStatus(participant.id!) === 'selected'"
+                                    class="pi pi-arrow-right text-primary text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 text-sm text-600">
+                <i class="pi pi-info-circle mr-1"></i>
+                Progreso: {{ evaluatedParticipants.size }} de {{ participants.length }} participantes evaluados
+            </div>
+        </div>
+
+        <form [formGroup]="evaluationForm" (ngSubmit)="onSubmit()">
+            <h3 class="text-xl font-semibold text-800 mb-3 border-bottom-1 surface-border pb-2">
+                Criterios de Evaluación
+                <span *ngIf="selectedParticipantId && participants.length > 0" class="text-primary">
+                    - {{ getSelectedParticipantName() }}
+                </span>
+            </h3>
+
+            <div formArrayName="details" class="flex flex-column gap-4 mb-5">
+                <div *ngFor="let detail of details.controls; let i = index" [formGroupName]="i"
+                    class="p-3 border-1 surface-border border-round hover:surface-50 transition-colors transition-duration-200">
+
+                    <div class="flex flex-column gap-2">
+                        <label class="font-medium text-900 text-lg">
+                            {{ detail.value.metricName }}
+                            <span *ngIf="detail.value.metricType === 'quantitative'" class="text-red-500">*</span>
+                        </label>
+
+                        <!-- Quantitative metric (rating 1-5) -->
+                        <div *ngIf="detail.value.metricType === 'quantitative'" class="flex flex-column gap-2">
+                            <div class="flex align-items-center gap-3">
+                                <p-rating formControlName="value" [stars]="5" [cancel]="false" onIcon="pi pi-circle-fill text-2xl text-primary" offIcon="pi pi-circle text-2xl text-400"></p-rating>
+                                <div class="ml-3 text-xl font-bold text-primary text-center">
+                                    {{ detail.get('value')?.value || '-' }} / 5
+                                </div>
+                            </div>
+                            <small *ngIf="detail.get('value')?.invalid && detail.get('value')?.touched" class="p-error">
+                                Por favor seleccione un valor entre 1 y 5
+                            </small>
+                        </div>
+
+                        <!-- Qualitative metric (optional comments) -->
+                        <div *ngIf="detail.value.metricType === 'qualitative'">
+                            <textarea formControlName="textValue" rows="3" pInputTextarea class="w-full"
+                                placeholder="Comentarios (Opcional)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Comments -->
+            <div class="mb-5">
+                <label class="font-medium text-900 mb-2 block">Comentarios Generales (Opcional)</label>
+                <textarea formControlName="comments" rows="4" pInputTextarea class="w-full"
+                    placeholder="Agregue comentarios adicionales sobre la evaluación..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-content-end gap-2">
+                <button pButton type="button" label="Cancelar" class="p-button-outlined p-button-secondary"
+                    routerLink="/jury"></button>
+                <button pButton type="submit"
+                    [label]="participants.length > 0 && evaluatedParticipants.size < participants.length ? 'Evaluar Participante' : 'Enviar Evaluación Completa'"
+                    [loading]="submitting"
+                    [disabled]="evaluationForm.invalid || (participants.length > 0 && !selectedParticipantId)"
+                    class="p-button-success">
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

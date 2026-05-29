@@ -1,0 +1,69 @@
+<div class="metric-builder">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h3>Constructor de Métricas</h3>
+    <button pButton icon="pi pi-plus" label="Nueva Métrica" 
+            (click)="showMetricDialog()" class="p-button-success"></button>
+  </div>
+
+  <div class="grid">
+    <div class="col-12 md:col-6 lg:col-4" *ngFor="let metric of metrics">
+      <p-card [header]="metric.name" [subheader]="metric.type === 'quantitative' ? 'Cuantitativa' : 'Cualitativa'">
+        <p>{{ metric.description }}</p>
+        <p><strong>Ponderación:</strong> {{ metric.weight }}%</p>
+        <p *ngIf="metric.maxScore"><strong>Puntuación máxima:</strong> {{ metric.maxScore }}</p>
+        
+        <ng-template pTemplate="footer">
+          <div class="flex gap-2">
+            <button pButton icon="pi pi-pencil" label="Editar" class="p-button-secondary p-button-sm"></button>
+            <button pButton icon="pi pi-trash" label="Eliminar" class="p-button-danger p-button-sm"></button>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+  </div>
+
+  <p-dialog header="Nueva Métrica" [(visible)]="displayMetricDialog" [style]="{width: '95vw', maxWidth: '500px'}">
+    <form [formGroup]="metricForm" (ngSubmit)="saveMetric()">
+      <div class="p-fluid">
+        <div class="field">
+          <label>Nombre de la métrica</label>
+          <input type="text" pInputText formControlName="name" placeholder="Ej: Calidad del Contenido">
+        </div>
+        
+        <div class="field">
+          <label>Descripción</label>
+          <textarea pInputTextarea formControlName="description" rows="3" 
+                    placeholder="Descripción de lo que evalúa esta métrica"></textarea>
+        </div>
+        
+        <div class="field">
+          <label>Tipo de métrica</label>
+          <p-dropdown [options]="metricTypes" formControlName="type" 
+                     optionLabel="label" optionValue="value"></p-dropdown>
+        </div>
+        
+        <div class="field" *ngIf="metricForm.get('type')?.value === 'quantitative'">
+          <label>Puntuación máxima</label>
+          <p-inputNumber formControlName="maxScore" [min]="1" [max]="10"></p-inputNumber>
+        </div>
+        
+        <div class="field">
+          <label>Ponderación (%)</label>
+          <p-inputNumber formControlName="weight" [min]="0" [max]="100"></p-inputNumber>
+        </div>
+        
+        <div class="field-checkbox">
+          <p-checkbox formControlName="required" [binary]="true" inputId="required"></p-checkbox>
+          <label for="required" class="ml-2">Métrica requerida</label>
+        </div>
+      </div>
+      
+      <div class="flex justify-content-end gap-2 mt-3">
+        <button pButton type="button" label="Cancelar" 
+                (click)="displayMetricDialog = false" class="p-button-secondary"></button>
+        <button pButton type="submit" label="Guardar" 
+                [disabled]="!metricForm.valid" class="p-button-success"></button>
+      </div>
+    </form>
+  </p-dialog>
+</div>

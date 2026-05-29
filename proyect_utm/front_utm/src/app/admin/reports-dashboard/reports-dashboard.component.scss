@@ -1,0 +1,63 @@
+.reports-dashboard {
+    padding-bottom: 2rem;
+}
+
+.ai-report-card {
+    transition: all 0.3s ease;
+}
+
+.ai-content {
+    line-height: 1.6;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    background-color: #FAFAF9;
+    /* Surface-50 approximately */
+}
+
+/* Custom styles for AI format */
+:host ::ng-deep .ai-content h1,
+:host ::ng-deep .ai-content h2,
+:host ::ng-deep .ai-content h3 {
+    color: var(--color-primary);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+:host ::ng-deep .ai-content strong {
+    color: var(--color-primary-light);
+}
+
+:host ::ng-deep .ai-content ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+:host ::ng-deep .ai-content li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+:host ::ng-deep .ai-content li:before {
+    content: "•";
+    color: var(--color-secondary);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    width: 1em;
+}
+
+/* Loading State Animation (Pulse) */
+button[loading=true] i {
+    animation: rotate 1s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

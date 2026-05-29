@@ -1,0 +1,344 @@
+<div class="event-management">
+  <p-confirmDialog></p-confirmDialog>
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h3>Gestión de Eventos</h3>
+    <div>
+      <button pButton icon="pi pi-cog" label="Configurar Campos Extra" (click)="showEavCreationDialog()"
+        class="p-button-secondary mr-2"></button>
+      <button pButton icon="pi pi-plus" label="Nuevo Evento" (click)="showEventDialog()"
+        class="p-button-success"></button>
+    </div>
+  </div>
+
+  <p-table [value]="events" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 50]" [loading]="false">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Fecha Inicio</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-event>
+      <tr>
+        <td>{{ event.titulo }}</td>
+        <td>{{ event.descripcion || 'Sin descripción' }}</td>
+        <td>{{ event.fecha_inicio | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <span [class]="'status-badge ' + getStatusBadgeClass(event.estado)">
+            {{ getStatusLabel(event.estado) }}
+          </span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <button pButton icon="pi pi-chart-bar" class="p-button-info p-button-sm" (click)="viewResults(event.id)"
+              pTooltip="Ver Resultados" tooltipPosition="top"></button>
+            <button *ngIf="event.estado === 'publicado'" pButton icon="pi pi-check-square"
+              class="p-button-success p-button-sm" (click)="finalizeEvent(event)" pTooltip="Finalizar Evento"
+              tooltipPosition="top"></button>
+            <button pButton icon="pi pi-pencil" class="p-button-secondary p-button-sm"
+              (click)="showEventDialog(event)" [disabled]="event.estado === 'finalizado' && !isAdmin"></button>
+            <button pButton icon="pi pi-trash" class="p-button-danger p-button-sm"
+              (click)="deleteEvent(event.id)" [disabled]="event.estado === 'finalizado' && !isAdmin"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center">No hay eventos registrados</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog [header]="isEditing ? 'Editar Evento' : 'Nuevo Evento'" [(visible)]="displayEventDialog"
+    [style]="{width: '95vw', maxWidth: '900px'}" [modal]="true" [maximizable]="true">
+    <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+      <p-tabView>
+        <p-tabPanel header="Información General">
+          <div class="p-fluid grid">
+            <div class="col-12 md:col-6">
+              <div class="field">
+                <label for="title">Título del Evento *</label>
+                <input id="title" type="text" pInputText formControlName="title"
+                  placeholder="Ingrese el título del evento">
+                <small *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched"
+                  class="p-error">Requerido
+                  (min 3 caracteres)</small>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="field">
+                <label for="startDate">Fecha de Inicio *</label>
+                <input id="startDate" type="datetime-local" pInputText formControlName="startDate">
+                <small *ngIf="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched"
+                  class="p-error">Requerido</small>
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="field">
+                <label for="endDate">Fecha de Fin</label>
+                <input id="endDate" type="datetime-local" pInputText formControlName="endDate">
+              </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+              <div class="field">
+                <label for="evalMode">Modalidad de Evaluación</label>
+                <p-dropdown id="evalMode" [options]="[{label:'Individual', value:'individual'}, {label:'Grupal (Equipos)', value:'group'}]" 
+                            formControlName="evalMode" appendTo="body"></p-dropdown>
+              </div>
+            </div>
+
+
+
+            <div class="col-12">
+              <div class="field">
+                <label for="description">Descripción *</label>
+                <textarea id="description" pInputTextarea formControlName="description" rows="3"
+                  placeholder="Descripción detallada"></textarea>
+                <small *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"
+                  class="p-error">Requerido (min 10 caracteres)</small>
+              </div>
+            </div>
+            
+            <!-- Campos Dinámicos del Evento -->
+            <div class="col-12" *ngIf="eventoParams.length > 0">
+              <h5 class="mt-3 mb-2 border-bottom-1 surface-border pb-2">Campos Adicionales del Evento</h5>
+              <div class="grid">
+                <ng-container *ngFor="let param of eventoParams">
+                  <div class="col-12 md:col-6" *ngIf="param.is_active">
+                    <div class="field">
+                      <label>{{ param.descripcion }}</label>
+                      <input type="text" pInputText [formControlName]="'eav_' + param.id" [placeholder]="'Ingrese ' + param.descripcion">
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <p-tabPanel [header]="eventForm.get('evalMode')?.value === 'group' ? 'Equipos' : 'Participantes'">
+          <div class="flex justify-content-between align-items-center mb-3">
+            <h4>{{ eventForm.get('evalMode')?.value === 'group' ? 'Lista de Equipos' : 'Lista de Participantes' }}</h4>
+            <button pButton type="button" icon="pi pi-plus" [label]="eventForm.get('evalMode')?.value === 'group' ? 'Agregar Equipo' : 'Agregar Participante'" class="p-button-sm p-button-outlined"
+              (click)="addParticipant()"></button>
+          </div>
+
+          <div formArrayName="participants">
+            <div *ngFor="let participant of participantsFormArray.controls; let i=index" [formGroupName]="i"
+              class="participant-item p-4 mb-3 border-1 surface-border border-round surface-50">
+              
+              <!-- Datos del Equipo (Solo visible en modalidad Grupal) -->
+              <div class="grid mb-3" *ngIf="eventForm.get('evalMode')?.value === 'group'">
+                <div class="col-12 md:col-5">
+                  <label class="font-bold">Nombre del Equipo *</label>
+                  <input type="text" pInputText formControlName="name" placeholder="Ej: Equipo Alpha">
+                </div>
+                <div class="col-12 md:col-5">
+                  <label class="font-bold">Descripción del Equipo</label>
+                  <input type="text" pInputText formControlName="description" placeholder="Opcional">
+                </div>
+                <div class="col-12 md:col-2 flex align-items-end justify-content-end">
+                  <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-outlined"
+                    pTooltip="Eliminar Equipo" (click)="removeParticipant(i)"></button>
+                </div>
+              </div>
+
+              <!-- Lista de Integrantes -->
+              <div class="surface-card p-3 border-round border-1 surface-border">
+                <div class="flex justify-content-between align-items-center mb-3">
+                  <h5 class="m-0">{{ eventForm.get('evalMode')?.value === 'group' ? 'Integrantes del Equipo' : 'Datos del Participante' }}</h5>
+                  <button *ngIf="eventForm.get('evalMode')?.value === 'group'" pButton type="button" icon="pi pi-user-plus" label="Añadir Integrante" class="p-button-sm p-button-text p-button-success"
+                    (click)="addIntegrante(i)"></button>
+                  <button *ngIf="eventForm.get('evalMode')?.value !== 'group'" pButton type="button" icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger"
+                    (click)="removeParticipant(i)" pTooltip="Eliminar Participante"></button>
+                </div>
+
+                <div formArrayName="integrantes">
+                  <div *ngFor="let integrante of getIntegrantesFormArray(i).controls; let j=index" [formGroupName]="j"
+                    class="grid align-items-center border-bottom-1 surface-border pb-2 pt-2 mb-2">
+                    
+                    <div class="col-12 md:col-3">
+                      <label class="text-sm">Nombres *</label>
+                      <input type="text" pInputText formControlName="nombres" class="p-inputtext-sm w-full" placeholder="Ej: Juan">
+                    </div>
+                    <div class="col-12 md:col-3">
+                      <label class="text-sm">Apellidos *</label>
+                      <input type="text" pInputText formControlName="apellidos" class="p-inputtext-sm w-full" placeholder="Ej: Pérez">
+                    </div>
+                    
+                    <!-- Campos Dinámicos EAV para este integrante -->
+                    <ng-container *ngFor="let param of participanteParams">
+                      <div class="col-12 md:col-2" *ngIf="param.is_active">
+                        <label class="text-sm">{{ param.descripcion }}</label>
+                        <input type="text" pInputText [formControlName]="'eav_' + param.id" class="p-inputtext-sm w-full" [placeholder]="param.descripcion">
+                      </div>
+                    </ng-container>
+
+                    <div class="col-12 md:col-1 flex justify-content-end align-items-end" *ngIf="eventForm.get('evalMode')?.value === 'group'">
+                      <button pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-danger p-button-text p-button-sm"
+                        (click)="removeIntegrante(i, j)" pTooltip="Quitar Integrante"></button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div *ngIf="getIntegrantesFormArray(i).length === 0" class="text-center p-2 text-500 text-sm">
+                  No hay integrantes añadidos a este equipo.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="participantsFormArray.length === 0" class="text-center p-3 surface-ground border-round">
+            <span class="text-500">No hay {{ eventForm.get('evalMode')?.value === 'group' ? 'equipos' : 'participantes' }} definidos.</span>
+          </div>
+        </p-tabPanel>
+
+        <p-tabPanel header="Métricas">
+          <div class="flex justify-content-between align-items-center mb-3">
+            <h4>Métricas de Evaluación</h4>
+            <button pButton type="button" icon="pi pi-plus" label="Agregar Métrica"
+              class="p-button-sm p-button-outlined" (click)="addMetric()"></button>
+          </div>
+
+          <div formArrayName="metrics">
+            <div *ngFor="let metric of metricsFormArray.controls; let i=index" [formGroupName]="i"
+              class="metric-item p-3 mb-2 border-1 surface-border border-round">
+              <div class="grid p-fluid align-items-end">
+                <div class="col-12 md:col-5">
+                  <label>Criterio *</label>
+                  <input type="text" pInputText formControlName="name" placeholder="Ej: Calidad del contenido" class="w-full">
+                </div>
+                <div class="col-12 md:col-5">
+                  <label>Evaluador *</label>
+                  <p-dropdown [options]="[{label:'Jurado (a participantes)', value:'jury'}, {label:'Asistente (al evento)', value:'student'}]" 
+                              formControlName="targetRole" appendTo="body" styleClass="w-full"></p-dropdown>
+                </div>
+                <div class="col-12 md:col-2 text-center pb-2">
+                  <span class="text-600 font-medium">Rango: 1 a 5</span>
+                </div>
+                <div class="col-12 flex justify-content-end">
+                  <button pButton type="button" icon="pi pi-trash" label="Eliminar"
+                    class="p-button-danger p-button-outlined p-button-sm" (click)="removeMetric(i)"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="metricsFormArray.length === 0" class="text-center p-3 surface-ground border-round">
+            <span class="text-500">No hay métricas definidas.</span>
+          </div>
+        </p-tabPanel>
+
+        <p-tabPanel header="Jurados">
+          <div class="p-fluid">
+            <h4 class="mb-3">Asignación de Jurados</h4>
+            <p-pickList [source]="sourceJurors" [target]="targetJurors" sourceHeader="Disponibles"
+              targetHeader="Seleccionados" [dragdrop]="true" [responsive]="true" [sourceStyle]="{'height':'300px'}"
+              [targetStyle]="{'height':'300px'}" filterBy="persona.nombres,correo" sourceFilterPlaceholder="Buscar por nombre o correo"
+              targetFilterPlaceholder="Buscar por nombre o correo">
+              <ng-template let-juror pTemplate="item">
+                <div class="product-item">
+                  <div class="font-bold mb-1">{{ juror.persona?.nombres || juror.usuario || juror.correo }}</div>
+                  <div class="text-sm text-600">{{ juror.correo }}</div>
+                </div>
+              </ng-template>
+            </p-pickList>
+          </div>
+        </p-tabPanel>
+
+        <!-- Tab Responsable (Only for admin) -->
+        <p-tabPanel header="Responsable" *ngIf="isAdmin">
+          <div class="p-fluid">
+            <h4 class="mb-3">Asignación de Responsable del Evento</h4>
+            <p class="text-sm text-500 mb-3"><i class="pi pi-info-circle"></i> Solo puedes seleccionar un (1) gestor. Si seleccionas otro, el actual será devuelto.</p>
+            
+            <p-pickList [source]="sourceManagers" [target]="targetManagers" sourceHeader="Gestores Disponibles" targetHeader="Gestor Asignado" 
+              [dragdrop]="true" [responsive]="true" [sourceStyle]="{ height: '300px' }" [targetStyle]="{ height: '300px' }" filterBy="persona.nombres,correo"
+              sourceFilterPlaceholder="Buscar por nombre o correo" targetFilterPlaceholder="Buscar por nombre o correo"
+              (onMoveToTarget)="onManagerMoveToTarget($event)">
+              <ng-template let-manager pTemplate="item">
+                <div class="product-item">
+                  <div class="font-bold mb-1">{{ manager.persona?.nombres || manager.usuario || manager.correo }}</div>
+                  <div class="text-sm text-600">{{ manager.correo }}</div>
+                </div>
+              </ng-template>
+            </p-pickList>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+
+      <div class="flex justify-content-end gap-2 mt-4">
+        <button pButton type="button" label="Cancelar" (click)="displayEventDialog = false"
+          class="p-button-secondary"></button>
+        <button *ngIf="!isReadOnly" pButton type="submit" label="{{ isEditing ? 'Actualizar' : 'Guardar' }}" [disabled]="!eventForm.valid"
+          class="p-button-success"></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- EAV Configuration Dialog -->
+  <!-- EAV Configuration Dialog -->
+  <p-dialog header="Configurar Campos Dinámicos" [(visible)]="displayEavDialog" [style]="{width: '95vw', maxWidth: '600px'}" [modal]="true" [maximizable]="true">
+    <p-tabView>
+      <p-tabPanel header="Campos Existentes">
+        <div class="mb-3">
+          <h5>Campos de Evento</h5>
+          <ul class="list-none p-0 m-0">
+            <li *ngFor="let param of eventoParams" class="flex align-items-center justify-content-between p-2 border-bottom-1 surface-border">
+              <span [class.text-500]="!param.is_active" [class.line-through]="!param.is_active">
+                {{ param.descripcion }} ({{ param.tipo_dato }})
+              </span>
+              <button pButton [icon]="param.is_active ? 'pi pi-eye' : 'pi pi-eye-slash'" 
+                      [class]="param.is_active ? 'p-button-danger p-button-text p-button-sm' : 'p-button-success p-button-text p-button-sm'" 
+                      (click)="toggleEavParam(param)" 
+                      [pTooltip]="param.is_active ? 'Desactivar' : 'Activar'"></button>
+            </li>
+            <li *ngIf="eventoParams.length === 0" class="p-2 text-500 text-sm">No hay campos configurados para Eventos.</li>
+          </ul>
+        </div>
+        <div class="mb-3">
+          <h5>Campos de Participantes</h5>
+          <ul class="list-none p-0 m-0">
+            <li *ngFor="let param of participanteParams" class="flex align-items-center justify-content-between p-2 border-bottom-1 surface-border">
+              <span [class.text-500]="!param.is_active" [class.line-through]="!param.is_active">
+                {{ param.descripcion }} ({{ param.tipo_dato }})
+              </span>
+              <button pButton [icon]="param.is_active ? 'pi pi-eye' : 'pi pi-eye-slash'" 
+                      [class]="param.is_active ? 'p-button-danger p-button-text p-button-sm' : 'p-button-success p-button-text p-button-sm'" 
+                      (click)="toggleEavParam(param)" 
+                      [pTooltip]="param.is_active ? 'Desactivar' : 'Activar'"></button>
+            </li>
+            <li *ngIf="participanteParams.length === 0" class="p-2 text-500 text-sm">No hay campos configurados para Participantes.</li>
+          </ul>
+        </div>
+      </p-tabPanel>
+      <p-tabPanel header="Crear Nuevo">
+        <div class="p-fluid mt-3">
+          <p class="mb-4 text-600">Agrega campos personalizados para guardar datos extra que no vienen por defecto en el sistema.</p>
+          <div class="field">
+            <label>¿A qué sección pertenece este campo?</label>
+            <p-dropdown [options]="[{label:'Evento General', value:'Evento'}, {label:'Participantes / Inscritos', value:'Inscripcion'}]" 
+                        [(ngModel)]="newEavParam.entity" appendTo="body"></p-dropdown>
+          </div>
+          <div class="field">
+            <label>Nombre del Campo (Ej: Edad, Categoría, Celular)</label>
+            <input type="text" pInputText [(ngModel)]="newEavParam.description">
+          </div>
+          <div class="field">
+            <label>Tipo de Dato</label>
+            <p-dropdown [options]="[{label:'Texto Libre', value:'string'}, {label:'Número', value:'number'}]" 
+                        [(ngModel)]="newEavParam.dataType" appendTo="body"></p-dropdown>
+          </div>
+          <div class="flex justify-content-end gap-2 mt-4">
+            <button pButton label="Cancelar" class="p-button-text p-button-secondary" (click)="displayEavDialog = false"></button>
+            <button pButton label="Guardar Campo" class="p-button-success" icon="pi pi-check" (click)="saveEavParam()"></button>
+          </div>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </p-dialog>
+</div>

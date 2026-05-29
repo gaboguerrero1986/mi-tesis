@@ -1,0 +1,6 @@
+
+  getSelectedParticipantName(): string {
+    if (!this.selectedParticipantId) return '';
+    const participant = this.participants.find(p => p.id === this.selectedParticipantId);
+    return participant?.name || '';
+  }

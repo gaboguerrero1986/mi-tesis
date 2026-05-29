@@ -1,0 +1,86 @@
+<div class="grid">
+  <div class="col-12">
+    <div class="flex justify-content-between align-items-center mb-4">
+      <h2 class="m-0 text-900 font-medium text-xl">Gestión de Responsables de Evento</h2>
+      <button pButton pRipple label="REGISTRAR GESTOR" icon="pi pi-plus" class="p-button-success"
+        (click)="showManagerDialog()"></button>
+    </div>
+
+    <div class="card p-0 border-none shadow-1 border-round">
+      <p-table [value]="managers" [paginator]="true" [rows]="10" responsiveLayout="scroll" styleClass="p-datatable-sm"
+        [rowHover]="true">
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200">NOMBRE</th>
+            <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200">EMAIL</th>
+            <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200 text-center">ESTADO</th>
+            <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200 text-center">ACCIONES</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-manager>
+          <tr>
+            <td class="font-medium text-900">{{ manager.name }}</td>
+            <td class="text-600">{{ manager.email }}</td>
+            <td class="text-center">
+              <span class="text-xs font-bold px-2 py-1 border-round bg-red-100 text-red-700">INACTIVO</span>
+              <!-- Logic for Active/Inactive could be added later if needed -->
+            </td>
+            <td class="text-center">
+              <div class="flex justify-content-center gap-2">
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm p-button-secondary"
+                  pTooltip="Editar" tooltipPosition="top" (click)="showManagerDialog(manager)"></button>
+                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                  pTooltip="Eliminar" tooltipPosition="top" (click)="removeManager(manager.id)"></button>
+                <button pButton pRipple icon="pi pi-refresh" class="p-button-rounded p-button-text p-button-sm p-button-warning"
+                  pTooltip="Resetear Contraseña" tooltipPosition="top" (click)="resetPassword(manager.id)"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="text-center p-4 text-500">
+              No hay gestores registrados en el sistema.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog [(visible)]="displayManagerDialog" [header]="editingId ? 'Editar Gestor' : 'Registrar Nuevo Gestor'"
+  [modal]="true" styleClass="p-fluid" [style]="{width: '450px'}" [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+  [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="content">
+    <form [formGroup]="managerForm" class="mt-2">
+      <div class="field">
+        <label for="name" class="font-medium text-900">Nombre Completo</label>
+        <input type="text" pInputText id="name" formControlName="name" placeholder="Ej: Juan Pérez" autofocus />
+        <small class="p-error" *ngIf="managerForm.get('name')?.invalid && managerForm.get('name')?.touched">
+          El nombre es requerido.
+        </small>
+      </div>
+      <div class="field mt-4">
+        <label for="email" class="font-medium text-900">Correo Electrónico</label>
+        <input type="email" pInputText id="email" formControlName="email" placeholder="Ej: juan@ejemplo.com" />
+        <small class="p-error" *ngIf="managerForm.get('email')?.invalid && managerForm.get('email')?.touched">
+          Ingrese un correo válido.
+        </small>
+      </div>
+    </form>
+    <div class="bg-blue-50 text-blue-700 p-3 border-round mt-4 flex align-items-start gap-2" *ngIf="!editingId">
+      <i class="pi pi-info-circle mt-1"></i>
+      <div class="text-sm">
+        Al crear un nuevo gestor, se enviará un correo de bienvenida y su contraseña temporal será <strong>temporal123</strong>.
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text text-600"
+      (click)="displayManagerDialog = false"></button>
+    <button pButton pRipple [label]="editingId ? 'Actualizar' : 'Guardar'" icon="pi pi-check"
+      (click)="saveManager()" [disabled]="managerForm.invalid"></button>
+  </ng-template>
+</p-dialog>

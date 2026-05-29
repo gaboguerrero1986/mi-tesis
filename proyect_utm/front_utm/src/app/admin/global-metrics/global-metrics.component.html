@@ -1,0 +1,53 @@
+<div class="card">
+    <div class="flex justify-content-between align-items-center mb-4">
+        <h2>Métricas Globales (Asistentes)</h2>
+        <button pButton label="Nueva Métrica" icon="pi pi-plus" (click)="showDialog()"></button>
+    </div>
+
+    <p-table [value]="metrics" [loading]="loading">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Rol</th>
+                <th>Rango</th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-metric>
+            <tr>
+                <td>{{ metric.nombre }}</td>
+                <td>Cuantitativa</td>
+                <td>{{ metric.rol_evaluador === 'student' ? 'Asistente' : 'Jurado' }}</td>
+                <td>1 - 5</td>
+                <td>
+                    <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text"
+                        (click)="showDialog(metric)"></button>
+                    <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger"
+                        (click)="deleteMetric(metric.id)"></button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <p-dialog [(visible)]="displayDialog" [header]="isEditing ? 'Editar Métrica' : 'Nueva Métrica'" [modal]="true"
+        [style]="{width: '95vw', maxWidth: '450px'}">
+        <form [formGroup]="metricForm" (ngSubmit)="saveMetric()">
+            <div class="field">
+                <label for="name">Nombre</label>
+                <input type="text" pInputText id="name" formControlName="name" class="w-full" />
+            </div>
+            <div class="field">
+                <label for="targetRole">Rol Objetivo</label>
+                <p-dropdown [options]="[{label: 'Asistente', value: 'student'}, {label: 'Jurado', value: 'jury'}]"
+                    formControlName="targetRole" optionLabel="label" optionValue="value" class="w-full"></p-dropdown>
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
+                    (click)="displayDialog = false"></button>
+                <button pButton label="Guardar" icon="pi pi-check" type="submit"
+                    [disabled]="metricForm.invalid"></button>
+            </div>
+        </form>
+    </p-dialog>
+</div>

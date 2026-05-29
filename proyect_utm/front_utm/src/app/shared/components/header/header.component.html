@@ -1,0 +1,11 @@
+<header class="app-header">
+  <div class="header-content" [class.shifted-content]="shifted">
+    <div class="logo-container">
+      <img src="assets/images/Logo_utm.png" alt="Logo UTM" class="header-logo mr-3">
+      <h1>Sistema de Evaluación de Eventos UTM</h1>
+    </div>
+    <nav>
+      <button *ngIf="isAuthenticated" pButton pRipple icon="pi pi-sign-out" label="Cerrar Sesión" class="p-button-danger" (click)="logout()"></button>
+    </nav>
+  </div>
+</header>

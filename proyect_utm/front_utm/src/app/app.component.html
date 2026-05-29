@@ -1,0 +1,10 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="app-container">
+  <app-header *ngIf="showHeader" [shifted]="hasSidebar"></app-header>
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+  <app-footer *ngIf="showFooter"></app-footer>
+  <app-loading *ngIf="loading"></app-loading>
+</div>
