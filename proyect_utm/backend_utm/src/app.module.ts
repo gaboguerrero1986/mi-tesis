@@ -34,6 +34,7 @@ import { ScheduleModule } from '@nestjs/schedule';
           username: configService.get<string>('DB_USERNAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
+          ssl: configService.get<string>('DB_HOST').includes('localhost') ? false : { rejectUnauthorized: false },
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: false, // Auto-create tables (dev only)
         }
