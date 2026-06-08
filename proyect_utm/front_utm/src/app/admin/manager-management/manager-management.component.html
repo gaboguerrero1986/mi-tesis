@@ -13,7 +13,7 @@
           <tr>
             <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200">NOMBRE</th>
             <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200">EMAIL</th>
-            <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200 text-center">ESTADO</th>
+
             <th class="text-700 bg-gray-50 border-bottom-1 border-gray-200 text-center">ACCIONES</th>
           </tr>
         </ng-template>
@@ -21,10 +21,7 @@
           <tr>
             <td class="font-medium text-900">{{ manager.name }}</td>
             <td class="text-600">{{ manager.email }}</td>
-            <td class="text-center">
-              <span class="text-xs font-bold px-2 py-1 border-round bg-red-100 text-red-700">INACTIVO</span>
-              <!-- Logic for Active/Inactive could be added later if needed -->
-            </td>
+
             <td class="text-center">
               <div class="flex justify-content-center gap-2">
                 <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm p-button-secondary"

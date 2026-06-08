@@ -11,7 +11,7 @@
       <tr>
         <th>Nombre</th>
         <th>Email</th>
-        <th>Estado</th>
+
         <th>Acciones</th>
       </tr>
     </ng-template>
@@ -19,11 +19,7 @@
       <tr>
         <td>{{ jury.name }}</td>
         <td>{{ jury.email }}</td>
-        <td>
-          <span [class]="'status-badge ' + (jury.isActive ? 'status-active' : 'status-inactive')">
-            {{ jury.isActive ? 'Activo' : 'Inactivo' }}
-          </span>
-        </td>
+
         <td>
           <div class="flex gap-2">
             <button pButton icon="pi pi-pencil" class="p-button-secondary p-button-sm"
