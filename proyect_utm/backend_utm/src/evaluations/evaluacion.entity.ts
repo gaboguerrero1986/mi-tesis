@@ -11,8 +11,6 @@ export class Evaluacion {
     @Column({ name: 'evento_id', nullable: true })
     evento_id: string;
 
-    @Column({ name: 'usuario_id', nullable: true })
-    usuario_id: string;
 
     @Column({ name: 'jurado_id', nullable: true })
     jurado_id: string;

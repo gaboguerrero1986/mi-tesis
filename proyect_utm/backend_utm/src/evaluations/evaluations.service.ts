@@ -35,8 +35,7 @@ export class EvaluationsService {
         }
 
         if (user && user.userId) {
-            payload.usuario_id = user.userId;
-            
+
             // If it's a juror evaluating, we need to find their JuradoEvento ID
             if (createEvaluationDto.eventId && createEvaluationDto.participantId) {
                 const juradoEvento = await this.juradoEventoRepository.findOne({
@@ -64,7 +63,8 @@ export class EvaluationsService {
 
     async getEvaluatedEventIds(userId: string): Promise<string[]> {
         const evaluations = await this.evaluacionesRepository.find({
-            where: { usuario_id: userId },
+            where: { jurado: { usuario_id: userId } },
+            relations: ['jurado'],
             select: ['evento_id']
         });
         const uniqueIds = new Set(evaluations.map(e => e.evento_id));
