@@ -25,7 +25,8 @@ export class ReportsService {
             `SELECT ev.titulo as evento, 
                     COALESCE(ins.nombre_equipo, p.nombres || ' ' || p.apellidos) as proyecto_o_participante, 
                     ins.tipo_inscripcion,
-                    ROUND(SUM(pm.avg_m * pm.peso_porcentual) / 100, 2) as nota_final
+                    ROUND(SUM(pm.avg_m * pm.peso_porcentual) / 100, 2) as nota_final,
+                    MAX(evals.total_evaluaciones) as total_evaluaciones
              FROM (
                  SELECT e.inscripcion_id, m.peso_porcentual, AVG(de.puntaje_asignado) as avg_m 
                  FROM esq_evaluaciones e 
@@ -34,6 +35,11 @@ export class ReportsService {
                  GROUP BY 1, m.id
              ) pm 
              JOIN esq_inscripciones ins ON pm.inscripcion_id = ins.id 
+             LEFT JOIN (
+                 SELECT inscripcion_id, COUNT(DISTINCT id) as total_evaluaciones
+                 FROM esq_evaluaciones
+                 GROUP BY 1
+             ) evals ON ins.id = evals.inscripcion_id
              LEFT JOIN esq_integrantes_inscripcion ii ON ins.id = ii.inscripcion_id AND ins.tipo_inscripcion = 'individual'
              LEFT JOIN esq_personas p ON ii.persona_id = p.id
              JOIN esq_eventos ev ON ins.evento_id = ev.id 
@@ -61,7 +67,7 @@ export class ReportsService {
         const allParticipants = ranking.map((r: any) => ({
             name: r.proyecto_o_participante,
             averageScore: Number(r.nota_final),
-            evaluationCount: 1, // Placeholder
+            evaluationCount: Number(r.total_evaluaciones) || 0,
             rank: r.rank
         }));
 
@@ -85,7 +91,7 @@ export class ReportsService {
         const metricasEstudiantes = await this.dataSource.query(
             `SELECT 
                 m.nombre as metrica,
-                COUNT(DISTINCT e.usuario_id) as total_estudiantes,
+                COUNT(DISTINCT e.id) as total_estudiantes,
                 ROUND(AVG(de.puntaje_asignado), 2) as puntaje_promedio,
                 MAX(de.puntaje_asignado) as puntaje_maximo,
                 MIN(de.puntaje_asignado) as puntaje_minimo
