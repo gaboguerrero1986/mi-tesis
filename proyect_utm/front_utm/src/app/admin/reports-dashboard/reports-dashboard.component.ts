@@ -19,6 +19,7 @@ export class ReportsDashboardComponent implements OnInit {
   
   // BI Data
   metricasData: any[] = [];
+  comentariosData: any[] = [];
   biStats: any = null;
   reportGeneratedDate: Date | null = null;
 
@@ -41,6 +42,7 @@ export class ReportsDashboardComponent implements OnInit {
 
   onEventSelect(): void {
     this.metricasData = [];
+    this.comentariosData = [];
     this.biStats = null;
   }
 
@@ -60,6 +62,7 @@ export class ReportsDashboardComponent implements OnInit {
 
         if (res.data) {
           this.metricasData = res.data.metricas;
+          this.comentariosData = res.data.comentarios;
           this.biStats = res.data.biStats;
           this.reportGeneratedDate = new Date();
           this.updateChartData();

@@ -11,7 +11,8 @@ export class Evaluacion {
     @Column({ name: 'evento_id', nullable: true })
     evento_id: string;
 
-
+    @Column({ type: 'text', nullable: true })
+    comentarios: string;
     @Column({ name: 'jurado_id', nullable: true })
     jurado_id: string;
 

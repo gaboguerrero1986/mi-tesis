@@ -27,6 +27,10 @@ export class EvaluationsService {
             payload.inscripcion_id = createEvaluationDto.participantId;
         }
 
+        if (createEvaluationDto.comentarios) {
+            payload.comentarios = createEvaluationDto.comentarios;
+        }
+
         if (createEvaluationDto.details && Array.isArray(createEvaluationDto.details)) {
             payload.detalles = createEvaluationDto.details.map((d: any) => ({
                 metrica_id: d.metricId,

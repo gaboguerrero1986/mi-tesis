@@ -83,6 +83,20 @@
                     </ng-template>
                 </p-table>
                 
+                <h3 class="mt-5 text-800">Comentarios y Testimonios</h3>
+                <div *ngIf="!comentariosData || comentariosData.length === 0" class="text-gray-500 italic p-3 surface-100 border-round">
+                    No hay comentarios registrados para este evento.
+                </div>
+                <div *ngIf="comentariosData && comentariosData.length > 0" class="comments-list mt-3">
+                    <div *ngFor="let comment of comentariosData" class="surface-card p-3 shadow-1 border-round mb-3 border-left-3 border-blue-500">
+                        <i class="pi pi-comment text-blue-500 mr-2"></i>
+                        <span class="text-700 font-italic">"{{ comment.comentarios }}"</span>
+                        <div class="text-xs text-500 mt-2 text-right">
+                            {{ comment.creado_at | date:'dd/MM/yyyy HH:mm' }}
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="mt-4 text-right">
                     <button pButton label="Descargar Reporte PDF" icon="pi pi-file-pdf" (click)="downloadReport()"
                         class="p-button-outlined p-button-secondary"></button>

@@ -112,10 +112,21 @@ export class ReportsService {
             puntajeGlobal = Number((sum / metricasEstudiantes.length).toFixed(2));
         }
 
+        const comentarios = await this.dataSource.query(
+            `SELECT DISTINCT e.id, e.comentarios, e.creado_at
+             FROM esq_evaluaciones e
+             JOIN esq_detalles_evaluacion de ON e.id = de.evaluacion_id
+             JOIN esq_metricas m ON de.metrica_id = m.id
+             WHERE e.evento_id = $1 AND m.rol_evaluador = 'student' AND e.comentarios IS NOT NULL AND TRIM(e.comentarios) != ''
+             ORDER BY e.creado_at DESC`,
+             [eventId]
+        );
+
         return {
             isBiReport: true,
             data: {
                 metricas: metricasEstudiantes,
+                comentarios: comentarios,
                 biStats: {
                     totalEvaluadores: totalEstudiantes,
                     puntajeGlobal: puntajeGlobal
