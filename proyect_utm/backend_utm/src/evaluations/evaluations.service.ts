@@ -27,8 +27,8 @@ export class EvaluationsService {
             payload.inscripcion_id = createEvaluationDto.participantId;
         }
 
-        if (createEvaluationDto.comentarios) {
-            payload.comentarios = createEvaluationDto.comentarios;
+        if (createEvaluationDto.comments) {
+            payload.comentarios = createEvaluationDto.comments;
         }
 
         if (createEvaluationDto.details && Array.isArray(createEvaluationDto.details)) {
