@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Evaluacion } from './evaluacion.entity';
@@ -39,6 +39,17 @@ export class EvaluationsService {
         }
 
         if (user && user.userId) {
+            payload.usuario_id = user.userId;
+
+            // Prevent double voting if it's a student evaluating the event directly (no participantId)
+            if (createEvaluationDto.eventId && !createEvaluationDto.participantId) {
+                const existing = await this.evaluacionesRepository.findOne({
+                    where: { evento_id: createEvaluationDto.eventId, usuario_id: user.userId }
+                });
+                if (existing) {
+                    throw new BadRequestException('Ya has evaluado este evento');
+                }
+            }
 
             // If it's a juror evaluating, we need to find their JuradoEvento ID
             if (createEvaluationDto.eventId && createEvaluationDto.participantId) {
@@ -67,7 +78,10 @@ export class EvaluationsService {
 
     async getEvaluatedEventIds(userId: string): Promise<string[]> {
         const evaluations = await this.evaluacionesRepository.find({
-            where: { jurado: { usuario_id: userId } },
+            where: [
+                { jurado: { usuario_id: userId } },
+                { usuario_id: userId }
+            ],
             relations: ['jurado'],
             select: ['evento_id']
         });

@@ -55,7 +55,12 @@
                 </div>
             </div>
 
-
+            <div class="flex flex-column gap-2 mb-4">
+                <label class="font-medium text-900 text-lg">Comentarios y Sugerencias (Opcional)</label>
+                <textarea pInputTextarea formControlName="comments" rows="4"
+                    placeholder="¿Qué te pareció el evento en general? Escribe tu testimonio aquí..."
+                    class="w-full border-round"></textarea>
+            </div>
 
             <div class="flex justify-content-end gap-3">
                 <button pButton type="button" label="Cancelar" routerLink="/student"

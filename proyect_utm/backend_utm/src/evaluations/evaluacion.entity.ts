@@ -13,6 +13,9 @@ export class Evaluacion {
 
     @Column({ type: 'text', nullable: true })
     comentarios: string;
+
+    @Column({ name: 'usuario_id', nullable: true })
+    usuario_id: string;
     @Column({ name: 'jurado_id', nullable: true })
     jurado_id: string;
 
