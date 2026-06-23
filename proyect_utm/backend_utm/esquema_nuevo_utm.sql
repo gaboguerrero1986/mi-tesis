@@ -21,7 +21,7 @@ CREATE TABLE esq_integrantes_inscripcion (id SERIAL PRIMARY KEY, inscripcion_id 
 CREATE TABLE esq_metricas (id SERIAL PRIMARY KEY, evento_id uuid REFERENCES esq_eventos(id), nombre VARCHAR(100), peso_porcentual NUMERIC(5,2), rol_evaluador VARCHAR(20) DEFAULT 'jury');
 CREATE TABLE esq_submetricas (id SERIAL PRIMARY KEY, metrica_id INTEGER REFERENCES esq_metricas(id), nombre VARCHAR(150));
 CREATE TABLE esq_jurados_evento (id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), evento_id uuid REFERENCES esq_eventos(id), usuario_id uuid REFERENCES esq_usuarios(id));
-CREATE TABLE esq_evaluaciones (id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), evento_id uuid REFERENCES esq_eventos(id), jurado_id uuid REFERENCES esq_jurados_evento(id), inscripcion_id uuid REFERENCES esq_inscripciones(id), creado_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE esq_evaluaciones (id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), evento_id uuid REFERENCES esq_eventos(id), jurado_id uuid REFERENCES esq_jurados_evento(id), inscripcion_id uuid REFERENCES esq_inscripciones(id), comentarios TEXT, usuario_id uuid REFERENCES esq_usuarios(id), creado_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE esq_detalles_evaluacion (id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), evaluacion_id uuid REFERENCES esq_evaluaciones(id), metrica_id INTEGER REFERENCES esq_metricas(id), puntaje_asignado NUMERIC(5,2));
 CREATE TABLE esq_logs_sistema (id BIGSERIAL PRIMARY KEY, usuario_id uuid REFERENCES esq_usuarios(id), accion VARCHAR(100), descripcion TEXT, fecha TIMESTAMP DEFAULT NOW());
 
@@ -51,9 +51,15 @@ WITH prom_met AS (
 SELECT ev.titulo as evento, 
        COALESCE(ins.nombre_equipo, p.nombres || ' ' || p.apellidos) as proyecto_o_participante, 
        ins.tipo_inscripcion,
-       ROUND(SUM(pm.avg_m * pm.peso_porcentual), 2) as nota_final
+       ROUND(SUM(pm.avg_m * pm.peso_porcentual) / 100, 2) as nota_final,
+       MAX(evals.total_evaluaciones) as total_evaluaciones
 FROM prom_met pm 
 JOIN esq_inscripciones ins ON pm.inscripcion_id = ins.id 
+LEFT JOIN (
+    SELECT inscripcion_id, COUNT(DISTINCT id) as total_evaluaciones
+    FROM esq_evaluaciones
+    GROUP BY 1
+) evals ON ins.id = evals.inscripcion_id
 LEFT JOIN esq_integrantes_inscripcion ii ON ins.id = ii.inscripcion_id AND ins.tipo_inscripcion = 'individual'
 LEFT JOIN esq_personas p ON ii.persona_id = p.id
 JOIN esq_eventos ev ON ins.evento_id = ev.id 
